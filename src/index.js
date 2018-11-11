@@ -10,6 +10,17 @@ function Square(props){
     );
 }
 
+class Block extends React.Component {
+  constructor(props) {
+    //super(props);
+    {props.team}
+    this.state = {
+      liberties: [],
+      pieces: [],
+    }
+  }
+}
+
 class Board extends React.Component {
 
 
@@ -65,6 +76,7 @@ class Game extends React.Component {
       history: [{
         squares: makeSquaresDoubleArray(9),
       }],
+      blocks: {},
       stepNumber: 0,
       xIsNext: true,
     }
@@ -86,6 +98,9 @@ class Game extends React.Component {
       return;
     }
     */}
+
+    newBlock = <Block team=this.state.xIsNext ? 'X' : 'O' />
+    blocks[(i,j)] = 
     squares[i][j] = this.state.xIsNext ? 'X' : 'O'; 
     this.setState({
       history: history.concat([{
