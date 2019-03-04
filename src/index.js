@@ -10,49 +10,76 @@ function Square(props){
     );
 }
 
+var boardSize = 9
+
 class Board extends React.Component {
 
-  renderSquare(i) {
+
+  renderSquare(i,j) {
     return (
     <Square
-        value={this.props.squares[i]}
-        onClick={() => this.props.onClick(i)}
+        value={this.props.squares[i][j]}
+        onClick={() => this.props.onClick(i,j)}
     />
     )
   }
 
+  renderRows(dim) {
+    // dimension
+    var rows = Array(dim).fill(null);
+    for (let i = 0; i < dim; i++) {
+      let row = Array(dim).fill(null);
+      for (let j = 0; j < dim; j++) {
+          row[j] = this.renderSquare(i,j);
+      }
+      rows[i] = <div className="board-row">{row}</div>
+    }
+    return ( rows );
+  }
+
   render() {
-
-
+    var rows = this.renderRows(9);
     return (
       <div>
-        <div ClassName="board-row">
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
-        </div>
+        {rows}
+
+        {/*
         <div className="board-row">
           {this.renderSquare(3)}
           {this.renderSquare(4)}
           {this.renderSquare(5)}
         </div>
         <div className="board-row">
-          {this.renderSquare(6)}
+          {this.renderSquarehttps://www.youtube.com/watch?v=H6dv6G1FWxk(6)}
           {this.renderSquare(7)}
           {this.renderSquare(8)}
         </div>
+        */}
       </div>
       );
     }
 }
+
+class Block extends React.Component {
+  constructor(props) {
+    super(props);
+    {props.team}
+    this.state = {
+      liberties: [],
+      pieces: [],
+    }
+  }
+}
+
 
 class Game extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       history: [{
-        squares: Array(9).fill(null),
+        squares: makeSquaresDoubleArray(boardSize),
       }],
+      blocks: {},
       stepNumber: 0,
       xIsNext: true,
     }
@@ -65,15 +92,83 @@ class Game extends React.Component {
     });
   }
 
-  handleClick(i) {
+  // will check to see if the space (i,j) can be played (i.e. is not in a zero liberty spot)
+  checkPlayable(i,j) {
+    // oTeam is otherTeam
+    let oTeam = this.state.xIsNext ? 'O' : 'X';
+
+    const history = this.state.history.slice(0, this.state.stepNumber + 1);
+    const current = history[history.length - 1];
+    const squares = current.squares.slice();
+    console.log(i,j)
+    console.log()
+    
+    let isTrue = true;
+
+    //if (i === 0 || i === boardSize-1) {
+
+    // top left corner case
+    if (i === 0 && j === 0) {
+      return (squares[i+1][j] === oTeam && squares[i][j+1] === oTeam) ? false : true;
+    }
+    // top right corner
+    else if (i === 0 && j === 8) {
+      return (squares[i+1][j] === oTeam && squares[i][j-1] === oTeam) ? false : true;
+    }
+    // bottom left corner
+    else if (i === 8 && j === 0) {
+      return (squares[i-1][j] === oTeam && squares[i][j+1] === oTeam) ? false : true;
+    }
+    // bottom right corner
+    else if (i === 8 && j === 8) {
+      return (squares[i-1][j] === oTeam && squares[i][j-1] === oTeam ? false : true)
+    }
+
+    // on the top side case
+    else if (i === 0) {
+      return (squares[i+1][j] === oTeam && squares[i][j+1] === oTeam &&
+        squares[i][j-1]) ? false : true;
+    }
+    // bottom side case
+    else if (i === 8) {
+      return (squares[i-1][j] === oTeam && squares[i][j+1] === oTeam &&
+        squares[i][j-1]) ? false : true;
+    }
+
+    // left side case
+    else if (j === 0) {
+      return (squares[i+1][j] === oTeam && squares[i][j+1] === oTeam &&
+        squares[i+1][j] === oTeam) ? false : true;
+    }
+
+    else if (j === 8) {
+      return (squares[i+1][j] === oTeam && squares[i-1][j] === oTeam &&
+        squares[i][j-1] === oTeam) ? false : true;
+    }
+
+    else {
+      return (squares[i+1][j] === oTeam && squares[i-1][j] === oTeam &&
+        squares[i][j-1] === oTeam && squares[i][j+1] == oTeam) ? false : true;
+
+    }
+
+
+  }
+
+  handleClick(i,j) {
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
 
-    if (calculateWinner(squares) || squares[i]) {
+    // checks if game is over, that place is on the board already, or if there are no liberties left
+    if (!(this.checkPlayable(i,j)) || calculateWinner(squares) || squares[i][j]) {
       return;
     }
-    squares[i] = this.state.xIsNext ? 'X' : 'O'; 
+
+
+    //var newBlock = <Block team={this.state.xIsNext ? 'X' : 'O'} />
+    this.state.blocks[(i,j)] = <Block team={this.state.xIsNext ? 'X' : 'O'} />
+    squares[i][j] = this.state.xIsNext ? 'X' : 'O'; 
     this.setState({
       history: history.concat([{
       squares: squares,
@@ -113,7 +208,7 @@ class Game extends React.Component {
         <div className="game-board">
           <Board
           squares={current.squares}
-          onClick={(i) => this.handleClick(i)} 
+          onClick={(i,j) => this.handleClick(i,j)} 
           />
         </div>
         <div className="game-info">
@@ -132,6 +227,16 @@ class Game extends React.Component {
 }
 
 // ========================================
+
+  function makeSquaresDoubleArray(dim) {
+    // dim is dimension
+    // symmetric board
+    var board = Array(dim).fill(null);
+    for (let i = 0; i < dim; i++) {
+      board[i] = Array(dim).fill(null);
+    }
+    return board;
+  }
 
   function calculateWinner(squares) {
   const lines = [
