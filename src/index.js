@@ -82,6 +82,7 @@ class Game extends React.Component {
       blocks: {},
       stepNumber: 0,
       xIsNext: true,
+      dim: 9,
     }
   }
 
@@ -92,65 +93,156 @@ class Game extends React.Component {
     });
   }
 
+  //playPiece(i, j)
+
+
+  // @i, j is location of board piece we are calculating liberties for
+  // @squares is the 2-D array of pieces representing the game-state, we are considering
+  calculateLiberties(i, j, squares, frontier) {
+    // frontier contains the squares already visited, so that we dont visit them again
+    console.log(i, j)
+    // had to contatenate as string to use hash
+    // need to rewrite this using a queue structure
+    let pointKey = i.toString() + j.toString()
+    frontier[pointKey] = true
+    let maxSize = this.state.dim;
+
+    let sameTeam = this.state.xIsNext ? 'X' : 'O';
+    let piece;
+    let count = 0;
+    console.log(frontier)
+    
+    // should refactor this to its own function instead of doing it for each i, j combo xD
+    if (i !== 0) {
+
+      piece = squares[i-1][j];
+      let newPieceKey = (i-1).toString() + j.toString()
+      if (piece === null && !frontier[newPieceKey]) {
+        count += 1;
+      }
+      else if (piece === sameTeam && frontier[newPieceKey] !== true) {
+        console.log(piece === sameTeam && frontier[(i-1,j)] !== true);
+        console.log("we in the if statement")
+        console.log(frontier[(i-1,j)])
+        count += this.calculateLiberties(i-1, j, squares, frontier);
+      }
+    };
+
+    if (i !== this.state.dim - 1) {
+      piece = squares[i + 1][j];
+      let newPieceKey = (i+1).toString() + j.toString()
+      if (piece === null && !frontier[newPieceKey]) {
+        count += 1;
+      }
+      else if (piece === sameTeam && frontier[newPieceKey] !== true) {
+        console.log(piece === sameTeam && frontier[(i-1,j)] !== true);
+        console.log("we in the if statement")
+        console.log(frontier[(i-1,j)])
+        count += this.calculateLiberties(i+1, j, squares, frontier);
+      }
+    };
+
+    if (j !==  0) {
+      piece = squares[i][j-1];
+
+      let newPieceKey = (i).toString() + (j-1).toString()
+      if (piece === null && !frontier[newPieceKey]) {
+        count += 1;
+      }
+      else if (piece === sameTeam && frontier[newPieceKey] !== true) {
+        console.log(piece === sameTeam && frontier[newPieceKey] !== true);
+        console.log("we in the if statement")
+        console.log(newPieceKey)
+        console.log(frontier[newPieceKey])
+        count += this.calculateLiberties(i, j-1, squares, frontier);
+      }
+    };
+
+    if (j !== this.state.dim - 1) {
+      piece = squares[i][j+1];
+      let newPieceKey = i.toString() + (j+1).toString()
+      if (piece === null && !frontier[newPieceKey]) {
+        count += 1;
+      }
+      else if (piece === sameTeam && frontier[newPieceKey] !== true) {
+        console.log(piece === sameTeam && frontier[newPieceKey] !== true);
+        console.log("we in the if statement")
+        console.log(newPieceKey)
+        console.log(frontier[newPieceKey])
+        count += this.calculateLiberties(i, j+1, squares, frontier);
+      }
+    };
+   
+    console.log({"calculated liberties": count,
+                "i": i,
+                "j": j});
+    return count;
+    
+  };
+
   // will check to see if the space (i,j) can be played (i.e. is not in a zero liberty spot)
   checkPlayable(i,j) {
     // oTeam is otherTeam
+    console.log("checkPlayable")
     let oTeam = this.state.xIsNext ? 'O' : 'X';
 
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
-    console.log(i,j)
-    console.log()
     
     let isTrue = true;
 
     //if (i === 0 || i === boardSize-1) {
 
-    // top left corner case
-    if (i === 0 && j === 0) {
-      return (squares[i+1][j] === oTeam && squares[i][j+1] === oTeam) ? false : true;
-    }
-    // top right corner
-    else if (i === 0 && j === 8) {
-      return (squares[i+1][j] === oTeam && squares[i][j-1] === oTeam) ? false : true;
-    }
-    // bottom left corner
-    else if (i === 8 && j === 0) {
-      return (squares[i-1][j] === oTeam && squares[i][j+1] === oTeam) ? false : true;
-    }
-    // bottom right corner
-    else if (i === 8 && j === 8) {
-      return (squares[i-1][j] === oTeam && squares[i][j-1] === oTeam ? false : true)
-    }
+    // // top left corner case
+    // if (i === 0 && j === 0) {
+    //   return (squares[i+1][j] === oTeam && squares[i][j+1] === oTeam) ? false : true;
+    // }
+    // // top right corner
+    // else if (i === 0 && j === 8) {
+    //   return (squares[i+1][j] === oTeam && squares[i][j-1] === oTeam) ? false : true;
+    // }
+    // // bottom left corner
+    // else if (i === 8 && j === 0) {
+    //   return (squares[i-1][j] === oTeam && squares[i][j+1] === oTeam) ? false : true;
+    // }
+    // // bottom right corner
+    // else if (i === 8 && j === 8) {
+    //   return (squares[i-1][j] === oTeam && squares[i][j-1] === oTeam ? false : true)
+    // }
 
-    // on the top side case
-    else if (i === 0) {
-      return (squares[i+1][j] === oTeam && squares[i][j+1] === oTeam &&
-        squares[i][j-1]) ? false : true;
-    }
-    // bottom side case
-    else if (i === 8) {
-      return (squares[i-1][j] === oTeam && squares[i][j+1] === oTeam &&
-        squares[i][j-1]) ? false : true;
-    }
+    // // on the top side case
+    // else if (i === 0) {
+    //   return (squares[i+1][j] === oTeam && squares[i][j+1] === oTeam &&
+    //     squares[i][j-1]) ? false : true;
+    // }
+    // // bottom side case
+    // else if (i === 8) {
+    //   return (squares[i-1][j] === oTeam && squares[i][j+1] === oTeam &&
+    //     squares[i][j-1]) ? false : true;
+    // }
 
-    // left side case
-    else if (j === 0) {
-      return (squares[i+1][j] === oTeam && squares[i][j+1] === oTeam &&
-        squares[i+1][j] === oTeam) ? false : true;
-    }
+    // // left side case
+    // else if (j === 0) {
+    //   return (squares[i+1][j] === oTeam && squares[i][j+1] === oTeam &&
+    //     squares[i+1][j] === oTeam) ? false : true;
+    // }
 
-    else if (j === 8) {
-      return (squares[i+1][j] === oTeam && squares[i-1][j] === oTeam &&
-        squares[i][j-1] === oTeam) ? false : true;
-    }
+    // else if (j === 8) {
+    //   return (squares[i+1][j] === oTeam && squares[i-1][j] === oTeam &&
+    //     squares[i][j-1] === oTeam) ? false : true;
+    // }
 
-    else {
-      return (squares[i+1][j] === oTeam && squares[i-1][j] === oTeam &&
-        squares[i][j-1] === oTeam && squares[i][j+1] == oTeam) ? false : true;
+    // else {
+    //   return (squares[i+1][j] === oTeam && squares[i-1][j] === oTeam &&
+    //     squares[i][j-1] === oTeam && squares[i][j+1] == oTeam) ? false : true;
 
-    }
+    // }
+    let calcLib = this.calculateLiberties(i, j, squares, {});
+    console.log({"checkplayable calculated liberties": calcLib,
+                "i": i,
+                "j": j});
+    return calcLib > 0
 
 
   }
@@ -159,16 +251,46 @@ class Game extends React.Component {
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
-
+    console.log("handleclick")
     // checks if game is over, that place is on the board already, or if there are no liberties left
-    if (!(this.checkPlayable(i,j)) || calculateWinner(squares) || squares[i][j]) {
+    if (!(squares[i][j] || this.checkPlayable(i,j)) || calculateWinner(squares) ) {
       return;
     }
 
 
     //var newBlock = <Block team={this.state.xIsNext ? 'X' : 'O'} />
     this.state.blocks[(i,j)] = <Block team={this.state.xIsNext ? 'X' : 'O'} />
-    squares[i][j] = this.state.xIsNext ? 'X' : 'O'; 
+    squares[i][j] = this.state.xIsNext ? 'X' : 'O';
+
+    if (i !== 0) {
+      if ((squares[i-1][j] === (this.state.xIsNext ? 'O': 'X')) && this.calculateLiberties(i-1,j, squares, {}) === 0) {
+        console.log("i !== 0")
+        squares[i-1][j] = null
+      }
+    };
+
+    if (i !== this.state.dim - 1) {
+      if ((squares[i+1][j] === (this.state.xIsNext ? 'O': 'X')) && this.calculateLiberties(i+1,j, squares, {}) === 0) {
+        console.log("i !== 8")
+        squares[i+1][j] = null
+      }
+    };
+
+    if (j !== 0) {
+      if ((squares[i][j-1] === (this.state.xIsNext ? 'O': 'X')) && this.calculateLiberties(i,j-1, squares, {}) === 0) {
+        console.log("j !== 0")
+        squares[i][j-1] = null
+      }
+    };
+
+    if (j !== this.state.dim - 1) {
+      if ((squares[i][j+1] === (this.state.xIsNext ? 'O': 'X')) && this.calculateLiberties(i,j+1, squares, {}) === 0) {
+        console.log("j !== 8")
+        squares[i][j+1] = null
+      }
+    };
+
+
     this.setState({
       history: history.concat([{
       squares: squares,
@@ -237,6 +359,7 @@ class Game extends React.Component {
     }
     return board;
   }
+
 
   function calculateWinner(squares) {
   const lines = [
