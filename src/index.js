@@ -224,6 +224,67 @@ class Game extends React.Component {
 
   }
 
+  getPieceFromSquare(i, j, squares) {
+    if (i < 0) {
+      return false;
+    }
+    else if (i >= this.state.dim) {
+      return false;
+    }
+    else if (j < 0) {
+      return false;
+    }
+    else if (j >= this.state.dim) {
+      return false;
+    }
+    else {
+      return squares[i][j];
+    }
+  }
+  getAllStructurePieces(i, j, team, squares, pieces) {
+    let piece = this.getPieceFromSquare(i+1, j, squares);
+    let pointKey = null;
+    if (piece !== false && piece === team) {
+      pointKey = (i+1).toString() + j.toString();
+      if (pieces.hasOwnProperty(pointKey) === false) {
+        pieces[pointKey] = [i+1,j];
+        pieces = this.getAllStructurePieces(i+1, j, team, squares, pieces);
+      }
+    }
+
+    piece = this.getPieceFromSquare(i-1, j, squares);
+    if (piece !== false && piece === team) {
+      pointKey = (i-1).toString() + j.toString();
+      if (pieces.hasOwnProperty(pointKey) === false) {
+        pieces[pointKey] = [i-1,j];
+        pieces = this.getAllStructurePieces(i-1, j, team, squares, pieces);
+      }
+    }
+
+    piece = this.getPieceFromSquare(i, j+1, squares);
+    if (piece !== false && piece === team) {
+      pointKey = i.toString() + (j+1).toString();
+      if (pieces.hasOwnProperty(pointKey) === false) {
+        pieces[pointKey] = [i,j+1];
+        pieces = this.getAllStructurePieces(i, j+1, team, squares, pieces);
+      }
+    }
+
+    piece = this.getPieceFromSquare(i, j-1, squares);
+    if (piece !== false && piece === team) {
+      pointKey = i.toString() + (j-1).toString();
+      if (pieces.hasOwnProperty(pointKey) === false ) {
+        pieces[pointKey] = [i,j-1];
+        pieces = this.getAllStructurePieces(i, j-1, team, squares, pieces);
+      }
+    }
+    return pieces;
+  }
+
+  removeStructure(i, j, team, squares, frontier) {
+    return null
+  }
+
   handleClick(i,j) {
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
@@ -240,7 +301,7 @@ class Game extends React.Component {
     //var newBlock = <Block team={this.state.xIsNext ? 'X' : 'O'} />
     this.state.blocks[(i,j)] = <Block team={this.state.xIsNext ? 'X' : 'O'} />
     squares[i][j] = curTeam;
-
+    this.getAllStructurePieces(i, j, curTeam, squares, {});
     console.log(i,j)
     if (i !== 0) {
       if ((squares[i-1][j] === oTeam) && this.calculateLiberties(i-1, j, oTeam, squares, {}) === 0) {
