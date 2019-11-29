@@ -281,8 +281,21 @@ class Game extends React.Component {
     return pieces;
   }
 
-  removeStructure(i, j, team, squares, frontier) {
-    return null
+  // given an object with coordinates as object keys, set the square array to null
+  // deletes structure at position (i,j)
+  removeStructure(i, j, team, squares) {
+    //let coordArray = Object.keys(coords);
+    let coords = this.getAllStructurePieces(i, j, team, squares, {});
+    let coordArray = Object.keys(coords); 
+    for (var k = 0; k < coordArray.length; k++) {
+      // need to refactor if we have board size of greater than 9
+      let curKey = coordArray[k];
+      // convert the key to coordinates
+      let i = Number(curKey.substring(0,1));
+      let j = Number(curKey.substring(1,2));
+      squares[i][j] = null;
+    }
+    return squares;
   }
 
   handleClick(i,j) {
@@ -307,28 +320,28 @@ class Game extends React.Component {
       if ((squares[i-1][j] === oTeam) && this.calculateLiberties(i-1, j, oTeam, squares, {}) === 0) {
         console.log("i !== 0")
         // replace squares = null to a new recursive Delete function
-        squares[i-1][j] = null
+        this.removeStructure(i-1, j, oTeam, squares)
       }
     };
 
     if (i !== this.state.dim - 1) {
       if ((squares[i+1][j] === oTeam) && this.calculateLiberties(i+1,j, oTeam, squares, {}) === 0) {
         console.log("i !== 8")
-        squares[i+1][j] = null
+        this.removeStructure(i+1, j, oTeam, squares)
       }
     };
 
     if (j !== 0) {
       if ((squares[i][j-1] === oTeam) && this.calculateLiberties(i,j-1, oTeam, squares, {}) === 0) {
         console.log("j !== 0")
-        squares[i][j-1] = null
+        this.removeStructure(i, j-1, oTeam, squares)
       }
     };
 
     if (j !== this.state.dim - 1) {
       if ((squares[i][j+1] === oTeam) && this.calculateLiberties(i,j+1, oTeam, squares, {}) === 0) {
         console.log("j !== 8")
-        squares[i][j+1] = null
+        this.removeStructure(i, j+1, oTeam, squares)
       }
     };
 
