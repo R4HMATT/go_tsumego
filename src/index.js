@@ -82,6 +82,7 @@ class Game extends React.Component {
       blocks: {},
       stepNumber: 0,
       xIsNext: true,
+      dim: 9,
     }
   }
 
@@ -92,83 +93,260 @@ class Game extends React.Component {
     });
   }
 
+  //playPiece(i, j)
+
+
+  // @i, j is location of board piece we are calculating liberties for
+  // @squares is the 2-D array of pieces representing the game-state, we are considering
+  calculateLiberties(i, j, team, squares, frontier) {
+    // frontier contains the squares already visited, so that we dont visit them again
+    // had to contatenate as string to use hash
+    // need to rewrite this using a queue structure
+    let pointKey = i.toString() + j.toString()
+    frontier[pointKey] = true
+    let maxSize = this.state.dim;
+
+    let sameTeam = team
+    let piece;
+    let count = 0;
+    
+    // should refactor this to its own function instead of doing it for each i, j combo xD
+    if (i !== 0) {
+
+      piece = squares[i-1][j];
+      let newPieceKey = (i-1).toString() + j.toString()
+      if (piece === null && !frontier[newPieceKey]) {
+        count += 1;
+      }
+      else if (piece === sameTeam && frontier[newPieceKey] !== true) {
+        count += this.calculateLiberties(i-1, j, sameTeam, squares, frontier);
+      }
+    };
+
+    if (i !== this.state.dim - 1) {
+      piece = squares[i + 1][j];
+      let newPieceKey = (i+1).toString() + j.toString()
+      if (piece === null && !frontier[newPieceKey]) {
+        count += 1;
+      }
+      else if (piece === sameTeam && frontier[newPieceKey] !== true) {
+        count += this.calculateLiberties(i+1, j, sameTeam, squares, frontier);
+      }
+    };
+
+    if (j !==  0) {
+      piece = squares[i][j-1];
+
+      let newPieceKey = (i).toString() + (j-1).toString()
+      if (piece === null && !frontier[newPieceKey]) {
+        count += 1;
+      }
+      else if (piece === sameTeam && frontier[newPieceKey] !== true) {
+        count += this.calculateLiberties(i, j-1, sameTeam, squares, frontier);
+      }
+    };
+
+    if (j !== this.state.dim - 1) {
+      piece = squares[i][j+1];
+      let newPieceKey = i.toString() + (j+1).toString()
+      if (piece === null && !frontier[newPieceKey]) {
+        count += 1;
+      }
+      else if (piece === sameTeam && frontier[newPieceKey] !== true) {
+        count += this.calculateLiberties(i, j+1, sameTeam, squares, frontier);
+      }
+    };
+   
+    return count;
+    
+  };
+
   // will check to see if the space (i,j) can be played (i.e. is not in a zero liberty spot)
-  checkPlayable(i,j) {
+  checkPlayable(i,j, team) {
     // oTeam is otherTeam
-    let oTeam = this.state.xIsNext ? 'O' : 'X';
+    let oTeam = team;
 
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
-    console.log(i,j)
-    console.log()
     
     let isTrue = true;
 
     //if (i === 0 || i === boardSize-1) {
 
-    // top left corner case
-    if (i === 0 && j === 0) {
-      return (squares[i+1][j] === oTeam && squares[i][j+1] === oTeam) ? false : true;
-    }
-    // top right corner
-    else if (i === 0 && j === 8) {
-      return (squares[i+1][j] === oTeam && squares[i][j-1] === oTeam) ? false : true;
-    }
-    // bottom left corner
-    else if (i === 8 && j === 0) {
-      return (squares[i-1][j] === oTeam && squares[i][j+1] === oTeam) ? false : true;
-    }
-    // bottom right corner
-    else if (i === 8 && j === 8) {
-      return (squares[i-1][j] === oTeam && squares[i][j-1] === oTeam ? false : true)
-    }
+    // // top left corner case
+    // if (i === 0 && j === 0) {
+    //   return (squares[i+1][j] === oTeam && squares[i][j+1] === oTeam) ? false : true;
+    // }
+    // // top right corner
+    // else if (i === 0 && j === 8) {
+    //   return (squares[i+1][j] === oTeam && squares[i][j-1] === oTeam) ? false : true;
+    // }
+    // // bottom left corner
+    // else if (i === 8 && j === 0) {
+    //   return (squares[i-1][j] === oTeam && squares[i][j+1] === oTeam) ? false : true;
+    // }
+    // // bottom right corner
+    // else if (i === 8 && j === 8) {
+    //   return (squares[i-1][j] === oTeam && squares[i][j-1] === oTeam ? false : true)
+    // }
 
-    // on the top side case
-    else if (i === 0) {
-      return (squares[i+1][j] === oTeam && squares[i][j+1] === oTeam &&
-        squares[i][j-1]) ? false : true;
-    }
-    // bottom side case
-    else if (i === 8) {
-      return (squares[i-1][j] === oTeam && squares[i][j+1] === oTeam &&
-        squares[i][j-1]) ? false : true;
-    }
+    // // on the top side case
+    // else if (i === 0) {
+    //   return (squares[i+1][j] === oTeam && squares[i][j+1] === oTeam &&
+    //     squares[i][j-1]) ? false : true;
+    // }
+    // // bottom side case
+    // else if (i === 8) {
+    //   return (squares[i-1][j] === oTeam && squares[i][j+1] === oTeam &&
+    //     squares[i][j-1]) ? false : true;
+    // }
 
-    // left side case
-    else if (j === 0) {
-      return (squares[i+1][j] === oTeam && squares[i][j+1] === oTeam &&
-        squares[i+1][j] === oTeam) ? false : true;
-    }
+    // // left side case
+    // else if (j === 0) {
+    //   return (squares[i+1][j] === oTeam && squares[i][j+1] === oTeam &&
+    //     squares[i+1][j] === oTeam) ? false : true;
+    // }
 
-    else if (j === 8) {
-      return (squares[i+1][j] === oTeam && squares[i-1][j] === oTeam &&
-        squares[i][j-1] === oTeam) ? false : true;
-    }
+    // else if (j === 8) {
+    //   return (squares[i+1][j] === oTeam && squares[i-1][j] === oTeam &&
+    //     squares[i][j-1] === oTeam) ? false : true;
+    // }
 
+    // else {
+    //   return (squares[i+1][j] === oTeam && squares[i-1][j] === oTeam &&
+    //     squares[i][j-1] === oTeam && squares[i][j+1] == oTeam) ? false : true;
+
+    // }
+    let calcLib = this.calculateLiberties(i, j, team, squares, {});
+    return calcLib > 0
+
+
+  }
+
+  getPieceFromSquare(i, j, squares) {
+    if (i < 0) {
+      return false;
+    }
+    else if (i >= this.state.dim) {
+      return false;
+    }
+    else if (j < 0) {
+      return false;
+    }
+    else if (j >= this.state.dim) {
+      return false;
+    }
     else {
-      return (squares[i+1][j] === oTeam && squares[i-1][j] === oTeam &&
-        squares[i][j-1] === oTeam && squares[i][j+1] == oTeam) ? false : true;
-
+      return squares[i][j];
+    }
+  }
+  getAllStructurePieces(i, j, team, squares, pieces) {
+    let piece = this.getPieceFromSquare(i+1, j, squares);
+    let pointKey = null;
+    if (piece !== false && piece === team) {
+      pointKey = (i+1).toString() + j.toString();
+      if (pieces.hasOwnProperty(pointKey) === false) {
+        pieces[pointKey] = [i+1,j];
+        pieces = this.getAllStructurePieces(i+1, j, team, squares, pieces);
+      }
     }
 
+    piece = this.getPieceFromSquare(i-1, j, squares);
+    if (piece !== false && piece === team) {
+      pointKey = (i-1).toString() + j.toString();
+      if (pieces.hasOwnProperty(pointKey) === false) {
+        pieces[pointKey] = [i-1,j];
+        pieces = this.getAllStructurePieces(i-1, j, team, squares, pieces);
+      }
+    }
 
+    piece = this.getPieceFromSquare(i, j+1, squares);
+    if (piece !== false && piece === team) {
+      pointKey = i.toString() + (j+1).toString();
+      if (pieces.hasOwnProperty(pointKey) === false) {
+        pieces[pointKey] = [i,j+1];
+        pieces = this.getAllStructurePieces(i, j+1, team, squares, pieces);
+      }
+    }
+
+    piece = this.getPieceFromSquare(i, j-1, squares);
+    if (piece !== false && piece === team) {
+      pointKey = i.toString() + (j-1).toString();
+      if (pieces.hasOwnProperty(pointKey) === false ) {
+        pieces[pointKey] = [i,j-1];
+        pieces = this.getAllStructurePieces(i, j-1, team, squares, pieces);
+      }
+    }
+    return pieces;
+  }
+
+  // given an object with coordinates as object keys, set the square array to null
+  // deletes structure at position (i,j)
+  removeStructure(i, j, team, squares) {
+    //let coordArray = Object.keys(coords);
+    let coords = this.getAllStructurePieces(i, j, team, squares, {});
+    let coordArray = Object.keys(coords); 
+    for (var k = 0; k < coordArray.length; k++) {
+      // need to refactor if we have board size of greater than 9
+      let curKey = coordArray[k];
+      // convert the key to coordinates
+      let i = Number(curKey.substring(0,1));
+      let j = Number(curKey.substring(1,2));
+      squares[i][j] = null;
+    }
+    return squares;
   }
 
   handleClick(i,j) {
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
-
+    var curTeam = this.state.xIsNext ? 'X' : 'O';
+    var oTeam = this.state.xIsNext ? 'O' : 'X';
+    console.log("handleclick")
     // checks if game is over, that place is on the board already, or if there are no liberties left
-    if (!(this.checkPlayable(i,j)) || calculateWinner(squares) || squares[i][j]) {
+    // note, calculateWinner is not implemented
+    if (squares[i][j] !== null || !this.checkPlayable(i,j, curTeam) || calculateWinner(squares) ) {
       return;
     }
 
 
     //var newBlock = <Block team={this.state.xIsNext ? 'X' : 'O'} />
     this.state.blocks[(i,j)] = <Block team={this.state.xIsNext ? 'X' : 'O'} />
-    squares[i][j] = this.state.xIsNext ? 'X' : 'O'; 
+    squares[i][j] = curTeam;
+    this.getAllStructurePieces(i, j, curTeam, squares, {});
+    console.log(i,j)
+    if (i !== 0) {
+      if ((squares[i-1][j] === oTeam) && this.calculateLiberties(i-1, j, oTeam, squares, {}) === 0) {
+        console.log("i !== 0")
+        // replace squares = null to a new recursive Delete function
+        this.removeStructure(i-1, j, oTeam, squares)
+      }
+    };
+
+    if (i !== this.state.dim - 1) {
+      if ((squares[i+1][j] === oTeam) && this.calculateLiberties(i+1,j, oTeam, squares, {}) === 0) {
+        console.log("i !== 8")
+        this.removeStructure(i+1, j, oTeam, squares)
+      }
+    };
+
+    if (j !== 0) {
+      if ((squares[i][j-1] === oTeam) && this.calculateLiberties(i,j-1, oTeam, squares, {}) === 0) {
+        console.log("j !== 0")
+        this.removeStructure(i, j-1, oTeam, squares)
+      }
+    };
+
+    if (j !== this.state.dim - 1) {
+      if ((squares[i][j+1] === oTeam) && this.calculateLiberties(i,j+1, oTeam, squares, {}) === 0) {
+        console.log("j !== 8")
+        this.removeStructure(i, j+1, oTeam, squares)
+      }
+    };
+
+
     this.setState({
       history: history.concat([{
       squares: squares,
@@ -238,6 +416,7 @@ class Game extends React.Component {
     return board;
   }
 
+// not implemented
   function calculateWinner(squares) {
   const lines = [
     [0, 1, 2],
@@ -255,7 +434,7 @@ class Game extends React.Component {
       return squares[a];
     }
   }
-  return null;
+  return false;
 }
 
 
