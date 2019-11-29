@@ -306,7 +306,8 @@ class Game extends React.Component {
     var oTeam = this.state.xIsNext ? 'O' : 'X';
     console.log("handleclick")
     // checks if game is over, that place is on the board already, or if there are no liberties left
-    if (!(squares[i][j] || this.checkPlayable(i,j, curTeam)) || calculateWinner(squares) ) {
+    // note, calculateWinner is not implemented
+    if (squares[i][j] !== null || !this.checkPlayable(i,j, curTeam) || calculateWinner(squares) ) {
       return;
     }
 
@@ -415,7 +416,7 @@ class Game extends React.Component {
     return board;
   }
 
-
+// not implemented
   function calculateWinner(squares) {
   const lines = [
     [0, 1, 2],
@@ -433,7 +434,7 @@ class Game extends React.Component {
       return squares[a];
     }
   }
-  return null;
+  return false;
 }
 
 
