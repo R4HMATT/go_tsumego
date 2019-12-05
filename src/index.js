@@ -4,9 +4,14 @@ import './index.css';
 
 function Square(props){
     return (                      //()=> should be function() {alert('click');}
-      <button className="square" onClick={() => props.onClick()}>
-        {props.value}
-      </button>
+      // <button className="square" onClick={() => props.onClick()}>
+      //   {props.value}
+      // </button>
+      <svg class="empty-go-cell" width="50" height="50">
+        <circle onClick={() => props.onClick()} cx="25" cy="25" r="5" fill="black"/>
+        <line x1="25" y1="0" x2="25" y2="50" style={{stroke:"rgb(0,0,0)", }} />
+        <line x1="0" y1="25" x2="50" y2="25" style={{stroke:"rgb(0,0,0)", }} />
+      </svg>
     );
 }
 
