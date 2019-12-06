@@ -7,17 +7,27 @@ ol, ul {
   padding-left: 30px;
 }
 
-.board-row:after {
+.board-row {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 0;
+  line-height: 0;
+}
+/* .board-row:after {
   clear: both;
   content: "";
   display: table;
-}
+} */
 
 .status {
   margin-bottom: 10px;
 }
 
-.square {
+.square svg {
+  margin:0;
+  padding:0;
+}
+/* .square {
   background: #fff;
   border: 1px solid #999;
   float: left;
@@ -30,6 +40,11 @@ ol, ul {
   padding: 0;
   text-align: center;
   width: 34px;
+} */
+
+.square line {
+  stroke: rgb(0,0,0);
+  stroke-width: 2;
 }
 
 .square:focus {
