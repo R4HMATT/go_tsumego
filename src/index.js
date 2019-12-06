@@ -305,8 +305,10 @@ class Game extends React.Component {
   // deletes structure at position (i,j)
   removeStructure(i, j, team, squares) {
     //let coordArray = Object.keys(coords);
-    let coords = this.getAllStructurePieces(i, j, team, squares, {});
-    let coordArray = Object.keys(coords); 
+    let curPieceKey = i.toString() + j.toString();
+    let pieces = {[curPieceKey]:[i,j]};
+    let coords = this.getAllStructurePieces(i, j, team, squares, pieces);
+    let coordArray = Object.keys(coords);
     for (var k = 0; k < coordArray.length; k++) {
       // need to refactor if we have board size of greater than 9
       let curKey = coordArray[k];
@@ -324,7 +326,6 @@ class Game extends React.Component {
     const squares = current.squares.slice();
     var curTeam = this.state.xIsNext ? 'X' : 'O';
     var oTeam = this.state.xIsNext ? 'O' : 'X';
-    console.log("handleclick")
     // checks if game is over, that place is on the board already, or if there are no liberties left
     // note, calculateWinner is not implemented
     if (squares[i][j] !== null || !this.checkPlayable(i,j, curTeam) || calculateWinner(squares) ) {
@@ -336,10 +337,8 @@ class Game extends React.Component {
     this.state.blocks[(i,j)] = <Block team={this.state.xIsNext ? 'X' : 'O'} />
     squares[i][j] = curTeam;
     this.getAllStructurePieces(i, j, curTeam, squares, {});
-    console.log(i,j)
     if (i !== 0) {
       if ((squares[i-1][j] === oTeam) && this.calculateLiberties(i-1, j, oTeam, squares, {}) === 0) {
-        console.log("i !== 0")
         // replace squares = null to a new recursive Delete function
         this.removeStructure(i-1, j, oTeam, squares)
       }
@@ -347,21 +346,18 @@ class Game extends React.Component {
 
     if (i !== this.state.dim - 1) {
       if ((squares[i+1][j] === oTeam) && this.calculateLiberties(i+1,j, oTeam, squares, {}) === 0) {
-        console.log("i !== 8")
         this.removeStructure(i+1, j, oTeam, squares)
       }
     };
 
     if (j !== 0) {
       if ((squares[i][j-1] === oTeam) && this.calculateLiberties(i,j-1, oTeam, squares, {}) === 0) {
-        console.log("j !== 0")
         this.removeStructure(i, j-1, oTeam, squares)
       }
     };
 
     if (j !== this.state.dim - 1) {
       if ((squares[i][j+1] === oTeam) && this.calculateLiberties(i,j+1, oTeam, squares, {}) === 0) {
-        console.log("j !== 8")
         this.removeStructure(i, j+1, oTeam, squares)
       }
     };
