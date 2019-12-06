@@ -3,14 +3,29 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
 function Square(props){
+    // function(team) {
+    //   if (team == 'X') {
+    //     return <circle onClick={() => }
+    //   }
+    // }
     return (                      //()=> should be function() {alert('click');}
       // <button className="square" onClick={() => props.onClick()}>
       //   {props.value}
       // </button>
-      <svg class="empty-go-cell" width="50" height="50">
-        <circle onClick={() => props.onClick()} cx="25" cy="25" r="5" fill="black"/>
+      <svg className="empty-go-cell" width="50" height="50">
         <line x1="25" y1="0" x2="25" y2="50" style={{stroke:"rgb(0,0,0)", }} />
         <line x1="0" y1="25" x2="50" y2="25" style={{stroke:"rgb(0,0,0)", }} />
+        {(() => {
+          if (props.value === null) {
+            return <circle style={{opacity:"0"}} onClick={() => props.onClick()} cx="25" cy="25" r="7" fill="red"/>;
+          }
+          switch(props.value) {
+            case('X'):
+              return <circle onClick={() => props.onClick()} cx="25" cy="25" r="15" fill="black"/>;
+            case('O'):
+              return <circle onClick={() => props.onClick()} cx="25" cy="25" r="15" stroke="black" fill="white"/>;
+          }
+        })()}
       </svg>
     );
 }
