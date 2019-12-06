@@ -3,15 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
 function Square(props){
-    // function(team) {
-    //   if (team == 'X') {
-    //     return <circle onClick={() => }
-    //   }
-    // }
-    return (                      //()=> should be function() {alert('click');}
-      // <button className="square" onClick={() => props.onClick()}>
-      //   {props.value}
-      // </button>
+    return (                      
       <svg className="empty-go-cell" width="50" height="50">
         <line x1="25" y1="0" x2="25" y2="50" style={{stroke:"rgb(0,0,0)", }} />
         <line x1="0" y1="25" x2="50" y2="25" style={{stroke:"rgb(0,0,0)", }} />
@@ -62,35 +54,10 @@ class Board extends React.Component {
     return (
       <div>
         {rows}
-
-        {/*
-        <div className="board-row">
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {this.renderSquarehttps://www.youtube.com/watch?v=H6dv6G1FWxk(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
-        </div>
-        */}
       </div>
       );
     }
 }
-
-class Block extends React.Component {
-  constructor(props) {
-    super(props);
-    {props.team}
-    this.state = {
-      liberties: [],
-      pieces: [],
-    }
-  }
-}
-
 
 class Game extends React.Component {
   constructor(props) {
@@ -192,52 +159,6 @@ class Game extends React.Component {
     
     let isTrue = true;
 
-    //if (i === 0 || i === boardSize-1) {
-
-    // // top left corner case
-    // if (i === 0 && j === 0) {
-    //   return (squares[i+1][j] === oTeam && squares[i][j+1] === oTeam) ? false : true;
-    // }
-    // // top right corner
-    // else if (i === 0 && j === 8) {
-    //   return (squares[i+1][j] === oTeam && squares[i][j-1] === oTeam) ? false : true;
-    // }
-    // // bottom left corner
-    // else if (i === 8 && j === 0) {
-    //   return (squares[i-1][j] === oTeam && squares[i][j+1] === oTeam) ? false : true;
-    // }
-    // // bottom right corner
-    // else if (i === 8 && j === 8) {
-    //   return (squares[i-1][j] === oTeam && squares[i][j-1] === oTeam ? false : true)
-    // }
-
-    // // on the top side case
-    // else if (i === 0) {
-    //   return (squares[i+1][j] === oTeam && squares[i][j+1] === oTeam &&
-    //     squares[i][j-1]) ? false : true;
-    // }
-    // // bottom side case
-    // else if (i === 8) {
-    //   return (squares[i-1][j] === oTeam && squares[i][j+1] === oTeam &&
-    //     squares[i][j-1]) ? false : true;
-    // }
-
-    // // left side case
-    // else if (j === 0) {
-    //   return (squares[i+1][j] === oTeam && squares[i][j+1] === oTeam &&
-    //     squares[i+1][j] === oTeam) ? false : true;
-    // }
-
-    // else if (j === 8) {
-    //   return (squares[i+1][j] === oTeam && squares[i-1][j] === oTeam &&
-    //     squares[i][j-1] === oTeam) ? false : true;
-    // }
-
-    // else {
-    //   return (squares[i+1][j] === oTeam && squares[i-1][j] === oTeam &&
-    //     squares[i][j-1] === oTeam && squares[i][j+1] == oTeam) ? false : true;
-
-    // }
     let calcLib = this.calculateLiberties(i, j, team, squares, {});
     return calcLib > 0
 
@@ -332,9 +253,6 @@ class Game extends React.Component {
       return;
     }
 
-
-    //var newBlock = <Block team={this.state.xIsNext ? 'X' : 'O'} />
-    this.state.blocks[(i,j)] = <Block team={this.state.xIsNext ? 'X' : 'O'} />
     squares[i][j] = curTeam;
     this.getAllStructurePieces(i, j, curTeam, squares, {});
     if (i !== 0) {
